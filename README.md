@@ -1,6 +1,6 @@
 # pagemask
 
-Open the raw version of pagemask.js https://raw.githubusercontent.com/hachi/pagemask/master/pagemask.js
+Open the raw version of pagemask.js https://raw.githubusercontent.com/hachi/pagemask/master/pagemask.js and copy the whole content into your clipboard.
 
 Go to http://chriszarate.github.io/bookmarkleter/ and paste it in the upper box.
 
