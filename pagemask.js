@@ -1,81 +1,85 @@
-void function ($) {
-    var pagemask = function ($) {
-        var dragMoveListener = function (event) {
-            console.log("Drag Move Listener Event");
-            var target = event.target,
-                // keep the dragged position in the data-x/data-y attributes
-                x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
-                y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+function dragListener(event) {
+    var target = event.target;
+    // keep the dragged position in the data-x/data-y attributes
+    var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+    var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
-            // translate the element
-            target.style.webkitTransform =
-            target.style.transform =
-                'translate(' + x + 'px, ' + y + 'px)';
+    // translate the element
+    target.style.transform =
+        'translate(' + x + 'px, ' + y + 'px)';
 
-            // update the posiion attributes
-            target.setAttribute('data-x', x);
-            target.setAttribute('data-y', y);
-        };
+    // update the posiion attributes
+    target.setAttribute('data-x', x);
+    target.setAttribute('data-y', y);
 
-        var div = $("<div class='draggable' style='width:500px;height:400px; border:5px solid black;  background-color:black; position:absolute; top: 150px; left:150px; z-index:99999'></div>");
-        var divi = interact('.draggable');
+    event.stopPropagation();
+    event.preventDefault();
+}
 
-        divi.draggable({
-            onmove: dragMoveListener
-        });
+function resizeListener (event) {
+    var target = event.target;
+    var x = (parseFloat(target.getAttribute('data-x')) || 0);
+    var y = (parseFloat(target.getAttribute('data-y')) || 0);
 
-        divi.resizable({
-            edges: { left: true, right: true, bottom: true, top: true }
-        });
+    // update the element's style
+    target.style.width  = event.rect.width + 'px';
+    target.style.height = event.rect.height + 'px';
 
-        divi.on('resizemove', function (event) {
-            console.log("Resize Move Event");
-            var target = event.target;
-                x = (parseFloat(target.getAttribute('data-x')) || 0),
-                y = (parseFloat(target.getAttribute('data-y')) || 0);
+    // translate when resizing from top or left edges
+    x += event.deltaRect.left;
+    y += event.deltaRect.top;
 
-            // update the element's style
-            target.style.width  = event.rect.width + 'px';
-            target.style.height = event.rect.height + 'px';
+    target.style.transform =
+        'translate(' + x + 'px,' + y + 'px)';
 
-            // translate when resizing from top or left edges
-            x += event.deltaRect.left;
-            y += event.deltaRect.top;
+    target.setAttribute('data-x', x);
+    target.setAttribute('data-y', y);
 
-            target.style.webkitTransform = target.style.transform =
-                'translate(' + x + 'px,' + y + 'px)';
+    event.stopPropagation();
+    event.preventDefault();
+}
 
-            target.setAttribute('data-x', x);
-            target.setAttribute('data-y', y);
-        });
+function pagemask () {
+    const div = document.createElement("div");
+    div.setAttribute("style",
+        "touch-action:none;" +
+        "user-select:none;" +
+        "box-sizing:border-box;" +
+        "width:500px;" +
+        "height:400px;" +
+        "border:5px solid gray;" +
+        "background-color:black;" +
+        "position:absolute;" +
+        "top:150px;" +
+        "left:150px;" +
+        "z-index:99999"
+    );
 
-        div.appendTo("body");
-    };
-
-    var loadinteract = function ($) {
-        var s=document.createElement("script");
-        s.src="//cdn.jsdelivr.net/interact.js/1.2.6/interact.min.js";
-        s.onload=s.onreadystatechange=function () {
-            var state=this.readyState;
-            state && "loaded" !== state && "complete" !== state || pagemask($)
+    interact(div)
+    .draggable({
+        listeners: {
+            move: dragListener
         }
-        document.getElementsByTagName("head")[0].appendChild(s)
-    };
-
-    var loadjsquery = function ($) {
-        var hasJQuery = $ && $.fn && parseFloat($.fn.jquery) >= 1.7;
-        if (hasJQuery)
-            loadinteract($);
-        else {
-            var s=document.createElement("script");
-            s.src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.js";
-            s.onload = s.onreadystatechange = function () {
-                var state=this.readyState;
-                state && "loaded" !== state && "complete" !== state || loadinteract(jQuery.noConflict())
-            }
-            document.getElementsByTagName("head")[0].appendChild(s)
+    })
+    .resizable({
+        edges: { left: true, right: true, bottom: true, top: true },
+        listeners: {
+            move: resizeListener
         }
-    };
+    });
 
-    loadjsquery($);
-}(window.jQuery);
+    document.body.appendChild(div);
+}
+
+function loadinteract() {
+    const s = document.createElement("script");
+
+    s.src="//cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js";
+    s.onload = s.onreadystatechange = function () {
+        var state = this.readyState;
+        state && "loaded" !== state && "complete" !== state || pagemask()
+    }
+    document.getElementsByTagName("head")[0].appendChild(s)
+};
+
+loadinteract();
